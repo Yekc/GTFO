@@ -1,5 +1,4 @@
-﻿using GTFO.Graphics.UI;
-using System.Drawing;
+﻿using System.Drawing;
 using static GTFO.Graphics.UI.WindowManager;
 
 namespace GTFO.Applications.System
