@@ -15,12 +15,12 @@ namespace GTFO.Graphics.UI
 
         public static void Update(Canvas Canvas)
         {
+            if (!MouseEx.IsClickPressed()) Mouse.Cursor = 0;
+
             foreach (Window W in Windows)
             {
                 if (MouseManager.MouseState != MouseState.Left)
                 {
-                    Mouse.Cursor = 0;
-
                     IsDragging = false;
                     W.IsMoving = false;
                     W.IsResizing = false;
