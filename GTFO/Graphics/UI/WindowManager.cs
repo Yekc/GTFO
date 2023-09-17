@@ -13,7 +13,7 @@ namespace GTFO.Graphics.UI
         public static List<Window> Windows = new();
         internal static bool IsDragging = false;
         internal static bool CanFocus;
-        internal static Window ToFocus;
+        internal static Window Focus;
 
         public static void Update(Canvas Canvas)
         {
@@ -23,7 +23,7 @@ namespace GTFO.Graphics.UI
 
             foreach (Window W in Windows)
             {
-                if (ToFocus == null) ToFocus = W;
+                if (Focus == null) Focus = W;
 
                 int Index = 0;
                 foreach (Window Window in Windows)
@@ -32,10 +32,23 @@ namespace GTFO.Graphics.UI
                     Index++;
                 }
 
-                if (CanFocus && !IsDragging && MouseEx.IsClickPressed() && MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)W.Size.Width, (ushort)(W.Size.Height + 20)) && !MouseEx.IsMouseWithin(ToFocus.Location.X, ToFocus.Location.Y - 20, (ushort)ToFocus.Size.Width, (ushort)(ToFocus.Size.Height + 20)))
+                if (CanFocus && !IsDragging && MouseEx.IsClickPressed() && MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)W.Size.Width, (ushort)(W.Size.Height + 20)))
                 {
-                    CanFocus = false;
-                    ToFocus = W;
+                    bool DoFocus = true;
+
+                    for (int I = Index + 1; I < Windows.Count; I++)
+                    {
+                        if (MouseEx.IsMouseWithin(Windows[I].Location.X, Windows[I].Location.Y - 20, (ushort)Windows[I].Size.Width, (ushort)(Windows[I].Size.Height + 20))) DoFocus = false;
+                    }
+
+                    if (DoFocus)
+                    {
+                        CanFocus = false;
+                        Focus = W;
+
+                        Windows.Remove(W);
+                        Windows.Insert(Windows.Count, W);
+                    }
                 }
 
                 if (MouseManager.MouseState != MouseState.Left)
@@ -47,7 +60,7 @@ namespace GTFO.Graphics.UI
 
 
                 //Move
-                if (ToFocus == W && MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)(W.Size.Width - 28), 20) && !W.IsMoving && !IsDragging)
+                if (Focus == W && MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)(W.Size.Width - 28), 20) && !W.IsMoving && !IsDragging)
                 {
                     W.ILocation.X = (int)MouseManager.X - W.Location.X;
                     W.ILocation.Y = (int)MouseManager.Y - W.Location.Y;
@@ -65,7 +78,7 @@ namespace GTFO.Graphics.UI
 
 
                 //Resize
-                if (ToFocus == W && W.IsResizeable && MouseEx.IsMouseWithin(W.Location.X + W.Size.Width - 8, W.Location.Y + W.Size.Height - 8, 8, 8) && !W.IsResizing && !IsDragging)
+                if (Focus == W && W.IsResizeable && MouseEx.IsMouseWithin(W.Location.X + W.Size.Width - 8, W.Location.Y + W.Size.Height - 8, 8, 8) && !W.IsResizing && !IsDragging)
                 {
                     IsDragging = true;
                     W.IsResizing = true;
@@ -86,14 +99,13 @@ namespace GTFO.Graphics.UI
                     }
                 }
 
-                if (ToFocus != W) W.Update(Canvas);
+                W.Update(Canvas);
             }
-            if (Windows.Count > 0) ToFocus.Update(Canvas);
 
             //Debug
             int R = 0;
             foreach (Applications.Manager.App A in Applications.Manager.Applications) if (A.IsRunning) R++;
-            Kernel.Canvas.DrawString(100, 0, "[W: " + Windows.Count.ToString() + "] [A: " + Applications.Manager.Applications.Count.ToString() + ", R: " + R.ToString() + "] [F: " + (ToFocus != null ? ToFocus.Size.Width.ToString() : "-1") + "]", default, Settings.SystemColors.ToolbarForeground);
+            Kernel.Canvas.DrawString(100, 0, "[W: " + Windows.Count.ToString() + "] [A: " + Applications.Manager.Applications.Count.ToString() + ", R: " + R.ToString() + "] [F: " + (Focus != null ? Focus.Size.Width.ToString() : "-1") + "]", default, Settings.SystemColors.ToolbarForeground);
         }
 
         public class Window : Control
@@ -141,7 +153,7 @@ namespace GTFO.Graphics.UI
             {
                 foreach (Control C in Controls)
                 {
-                    if (!C.IsEnabled || ToFocus != C.Parent) continue;
+                    if (!C.IsEnabled || Focus != C.Parent) continue;
 
                     if (MouseEx.IsMouseWithin(XOffset + C.Location.X, YOffset + C.Location.Y, (ushort)C.Size.Width, (ushort)C.Size.Height))
                     {
@@ -209,7 +221,7 @@ namespace GTFO.Graphics.UI
                 foreach (Window W in Windows) if (W.Parent == Parent) Kill++;
                 if (Kill < 2) Parent.Kill();
 
-                ToFocus = null;
+                Focus = null;
                 Windows.Remove(this);
             }
         }
