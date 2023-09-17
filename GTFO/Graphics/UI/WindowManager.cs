@@ -12,35 +12,43 @@ namespace GTFO.Graphics.UI
     {
         public static List<Window> Windows = new();
         internal static bool IsDragging = false;
+        internal static bool CanFocus;
+        internal static Window ToFocus;
 
         public static void Update(Canvas Canvas)
         {
-            //Debug
-            int R = 0;
-            foreach (Applications.Manager.App A in Applications.Manager.Applications) if (A.IsRunning) R++;
-            Kernel.Canvas.DrawString(100, 0, "[W: " + Windows.Count.ToString() + "] [A: " + Applications.Manager.Applications.Count.ToString() + ", R: " + R.ToString() + "]", default, Settings.SystemColors.ToolbarForeground);
-
+            CanFocus = true;
 
             if (!MouseEx.IsClickPressed()) Mouse.Cursor = 0;
 
             foreach (Window W in Windows)
             {
+                if (ToFocus == null) ToFocus = W;
+
+                int Index = 0;
+                foreach (Window Window in Windows)
+                {
+                    if (Window == W) break;
+                    Index++;
+                }
+
+                if (CanFocus && !IsDragging && MouseEx.IsClickPressed() && MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)W.Size.Width, (ushort)(W.Size.Height + 20)) && !MouseEx.IsMouseWithin(ToFocus.Location.X, ToFocus.Location.Y - 20, (ushort)ToFocus.Size.Width, (ushort)(ToFocus.Size.Height + 20)))
+                {
+                    CanFocus = false;
+                    ToFocus = W;
+                }
+
                 if (MouseManager.MouseState != MouseState.Left)
                 {
                     IsDragging = false;
                     W.IsMoving = false;
                     W.IsResizing = false;
-
-                    W.CloseButton.Disabled = false;
                 }
 
 
                 //Move
-                if (MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)(W.Size.Width - 28), 20) && !W.IsMoving && !IsDragging)
+                if (ToFocus == W && MouseEx.IsMouseWithin(W.Location.X, W.Location.Y - 20, (ushort)(W.Size.Width - 28), 20) && !W.IsMoving && !IsDragging)
                 {
-                    Windows.Remove(W);
-                    Windows.Insert(Windows.Count, W);
-
                     W.ILocation.X = (int)MouseManager.X - W.Location.X;
                     W.ILocation.Y = (int)MouseManager.Y - W.Location.Y;
                     IsDragging = true;
@@ -50,7 +58,6 @@ namespace GTFO.Graphics.UI
                 if (W.IsMoving)
                 {
                     Mouse.Cursor = 1;
-                    W.CloseButton.Disabled = true;
 
                     W.Location.X = (int)MouseManager.X - W.ILocation.X;
                     W.Location.Y = (int)MouseManager.Y - W.ILocation.Y;
@@ -58,11 +65,8 @@ namespace GTFO.Graphics.UI
 
 
                 //Resize
-                if (W.IsResizeable && MouseEx.IsMouseWithin(W.Location.X + W.Size.Width - 8, W.Location.Y + W.Size.Height - 8, 8, 8) && !W.IsResizing && !IsDragging)
+                if (ToFocus == W && W.IsResizeable && MouseEx.IsMouseWithin(W.Location.X + W.Size.Width - 8, W.Location.Y + W.Size.Height - 8, 8, 8) && !W.IsResizing && !IsDragging)
                 {
-                    Windows.Remove(W);
-                    Windows.Insert(Windows.Count, W);
-
                     IsDragging = true;
                     W.IsResizing = true;
                 }
@@ -70,7 +74,7 @@ namespace GTFO.Graphics.UI
                 if (W.IsResizing)
                 {
                     Mouse.Cursor = 2;
-                    W.CloseButton.Disabled = true;
+                    IsDragging = true;
 
                     if (MouseEx.IsClickPressed())
                     {
@@ -82,9 +86,14 @@ namespace GTFO.Graphics.UI
                     }
                 }
 
-
-                W.Update(Canvas);
+                if (ToFocus != W) W.Update(Canvas);
             }
+            if (Windows.Count > 0) ToFocus.Update(Canvas);
+
+            //Debug
+            int R = 0;
+            foreach (Applications.Manager.App A in Applications.Manager.Applications) if (A.IsRunning) R++;
+            Kernel.Canvas.DrawString(100, 0, "[W: " + Windows.Count.ToString() + "] [A: " + Applications.Manager.Applications.Count.ToString() + ", R: " + R.ToString() + "] [F: " + (ToFocus != null ? ToFocus.Size.Width.ToString() : "-1") + "]", default, Settings.SystemColors.ToolbarForeground);
         }
 
         public class Window : Control
@@ -115,10 +124,11 @@ namespace GTFO.Graphics.UI
 
                 TitleShelf = new(Location, new Size(Size.Width, 20), Settings.SystemColors.ShelfBackgroundLight, Settings.SystemColors.ShelfBackgroundDark);
                 WindowBody = new(new Point(Location.X, Location.Y + 20), new Size(Size.Width, Size.Height - 20), Settings.SystemColors.WindowBackground, 0);
-                CloseButton = new(new Point(Location.X + Size.Width - 28, Location.Y - 20), new Size(27, 20), 0, string.Empty, new(240, 101, 101), Settings.SystemColors.ShelfBackgroundLight);
+                CloseButton = new(new Point(Location.X + Size.Width - 28, Location.Y - 20), new Size(28, 20), 0, string.Empty, new(240, 101, 101), Settings.SystemColors.ShelfBackgroundLight);
                 CloseButton.Gradient3D = true;
                 CloseButton.GradientColor = new(200, 61, 61);
                 CloseButton.OnClick = new((int _, int _, MouseState _) => { Close(); });
+                CloseButton.Parent = this;
 
                 ShelfControls.Add(CloseButton);
 
@@ -131,7 +141,7 @@ namespace GTFO.Graphics.UI
             {
                 foreach (Control C in Controls)
                 {
-                    if (!C.IsEnabled) continue;
+                    if (!C.IsEnabled || ToFocus != C.Parent) continue;
 
                     if (MouseEx.IsMouseWithin(XOffset + C.Location.X, YOffset + C.Location.Y, (ushort)C.Size.Width, (ushort)C.Size.Height))
                     {
@@ -199,6 +209,7 @@ namespace GTFO.Graphics.UI
                 foreach (Window W in Windows) if (W.Parent == Parent) Kill++;
                 if (Kill < 2) Parent.Kill();
 
+                ToFocus = null;
                 Windows.Remove(this);
             }
         }

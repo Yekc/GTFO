@@ -1,4 +1,5 @@
-﻿using PrismAPI.Graphics;
+﻿using Cosmos.System;
+using PrismAPI.Graphics;
 using PrismAPI.Tools.Extentions;
 using PrismAPI.UI.Config;
 using System;
@@ -38,9 +39,11 @@ namespace GTFO.Graphics.UI.Controls
 
             if (!Disabled && MouseEx.IsMouseWithin(Location.X, Location.Y, (ushort)Size.Width, (ushort)Size.Height))
             {
-                if (MouseEx.IsClickPressed())
+                if (MouseManager.MouseState == MouseState.None && MouseManager.LastMouseState == MouseState.Left)
                 {
                     Status = CursorStatus.Clicked;
+                    if (Parent == null) OnClick((int)MouseManager.X, (int)MouseManager.Y, MouseManager.LastMouseState);
+                    MouseManager.LastMouseState = MouseState.None;
                 }
                 else
                 {
@@ -50,6 +53,16 @@ namespace GTFO.Graphics.UI.Controls
             else
             {
                 Status = CursorStatus.Idle;
+            }
+
+            if (!Disabled && Parent == null)
+            {
+                ConsoleKeyInfo? Key = KeyboardEx.ReadKey();
+
+                if (Key != null)
+                {
+                    OnKey(Key.Value);
+                }
             }
 
             void DrawGradientBackground(PrismAPI.Graphics.Color Background, PrismAPI.Graphics.Color GradientColor)
@@ -65,7 +78,7 @@ namespace GTFO.Graphics.UI.Controls
 
                     Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, Gradient3DColor);
                     Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, Gradient3DColor);
-                    Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, Gradient3DColor);
+                    Kernel.Canvas.DrawLine(Location.X + Size.Width - 1, Location.Y, Location.X + Size.Width - 1, Location.Y + Size.Height, Gradient3DColor);
                 }
             }
 
@@ -103,7 +116,7 @@ namespace GTFO.Graphics.UI.Controls
                     break;
             }
 
-            Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
+            Kernel.Canvas.DrawString(Center ? Location.X + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
         }
     }
 }

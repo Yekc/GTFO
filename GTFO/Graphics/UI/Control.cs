@@ -17,6 +17,7 @@ namespace GTFO.Graphics.UI
         public PrismAPI.Graphics.Color Background = Settings.SystemColors.WindowBackground;
         public ushort Radius = 0;
         public bool IsEnabled = true;
+        public WindowManager.Window Parent;
 
         public CursorStatus Status;
 

@@ -23,7 +23,6 @@ namespace GTFO
             Canvas = Display.GetDisplay((ushort)Settings.DisplaySize.Width, (ushort)Settings.DisplaySize.Height);
 
             Applications.Manager.InitializeSystemApplications();
-            Applications.Manager.RunApplication("console");
         }
 
         protected override void Run()
@@ -32,6 +31,8 @@ namespace GTFO
 
             Toolbar.Draw();
             Canvas.DrawString(2, 2, $"{Canvas.GetFPS()}", default, Settings.SystemColors.ToolbarForeground);
+
+            Applications.Manager.RunApplication("console");
 
             WindowManager.Update(Canvas);
             Mouse.Draw();
