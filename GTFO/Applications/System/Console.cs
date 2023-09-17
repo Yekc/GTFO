@@ -13,7 +13,9 @@ namespace GTFO.Applications.System
         {
             this.Identifier = Identifier;
 
-            CreateWindowButton = new(new Point(400, 1), new Size(150, 18), 2, "Create Window", Graphics.Settings.SystemColors.ShelfBackgroundDark, Graphics.Settings.SystemColors.ShelfForeground, true);
+            CreateWindowButton = new(new Point(400, 2), new Size(125, 18), 2, "Test Window", Graphics.Settings.SystemColors.ShelfBackgroundLight, Graphics.Settings.SystemColors.ShelfForeground, true);
+            CreateWindowButton.Gradient3D = true;
+            CreateWindowButton.GradientColor = Graphics.Settings.SystemColors.ShelfBackgroundDark;
             CreateWindowButton.OnClick = new((int _, int _, MouseState _) => { CreateWindow(); });
         }
 

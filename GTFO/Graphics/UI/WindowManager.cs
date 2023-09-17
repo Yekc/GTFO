@@ -23,7 +23,12 @@ namespace GTFO.Graphics.UI
 
             foreach (Window W in Windows)
             {
-                if (Focus == null) Focus = W;
+                if (Focus == null)
+                {
+                    Focus = W;
+                    Windows.Remove(W);
+                    Windows.Insert(Windows.Count, W);
+                }
 
                 int Index = 0;
                 foreach (Window Window in Windows)
@@ -68,9 +73,10 @@ namespace GTFO.Graphics.UI
                     W.IsMoving = true;
                 }
 
-                if (W.IsMoving)
+                if (Focus == W && W.IsMoving)
                 {
                     Mouse.Cursor = 1;
+                    IsDragging = true;
 
                     W.Location.X = (int)MouseManager.X - W.ILocation.X;
                     W.Location.Y = (int)MouseManager.Y - W.ILocation.Y;
@@ -84,7 +90,7 @@ namespace GTFO.Graphics.UI
                     W.IsResizing = true;
                 }
 
-                if (W.IsResizing)
+                if (Focus == W && W.IsResizing)
                 {
                     Mouse.Cursor = 2;
                     IsDragging = true;
@@ -149,19 +155,19 @@ namespace GTFO.Graphics.UI
                 this.Text = Text;
             }
 
-            internal static void Process(int XOffset, int YOffset, List<Control> Controls, Canvas Target, ConsoleKeyInfo? Key)
+            internal static void Process(List<Control> Controls, Canvas Target, ConsoleKeyInfo? Key)
             {
                 foreach (Control C in Controls)
                 {
                     if (!C.IsEnabled || Focus != C.Parent) continue;
 
-                    if (MouseEx.IsMouseWithin(XOffset + C.Location.X, YOffset + C.Location.Y, (ushort)C.Size.Width, (ushort)C.Size.Height))
+                    if (MouseEx.IsMouseWithin(C.Location.X, C.Location.Y, (ushort)C.Size.Width, (ushort)C.Size.Height))
                     {
                         C.Status = (MouseManager.MouseState != MouseState.None) ? CursorStatus.Clicked : CursorStatus.Hovering;
 
                         if (MouseManager.MouseState == MouseState.None && MouseManager.LastMouseState != MouseState.None)
                         {
-                            C.OnClick(XOffset - (int)MouseManager.X, YOffset - (int)MouseManager.Y, MouseManager.LastMouseState);
+                            C.OnClick((int)MouseManager.X, (int)MouseManager.Y, MouseManager.LastMouseState);
                         }
                     }
                     else
@@ -182,8 +188,8 @@ namespace GTFO.Graphics.UI
             {
                 ConsoleKeyInfo? Key = KeyboardEx.ReadKey();
 
-                Process(0, 0, ShelfControls, TitleShelf, Key);
-                Process(0, 0, Controls, WindowBody, Key);
+                Process(ShelfControls, TitleShelf, Key);
+                Process(Controls, WindowBody, Key);
 
                 TitleShelf.Location = new Point(Location.X, Location.Y - 20);
                 TitleShelf.Size = new Size(Size.Width, 20);

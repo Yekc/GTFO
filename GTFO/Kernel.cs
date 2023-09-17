@@ -37,6 +37,7 @@ namespace GTFO
             WindowManager.Update(Canvas);
             Mouse.Draw();
             Canvas.Update();
+
             Heap.Collect();
         }
     }
