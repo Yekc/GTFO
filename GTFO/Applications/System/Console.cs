@@ -3,14 +3,27 @@ using static GTFO.Graphics.UI.WindowManager;
 
 namespace GTFO.Applications.System
 {
-    public static class Console
+    public class Console : Manager.App
     {
-        public static Window MainWindow = null!;
+        public Window MainWindow = null!;
 
-        public static void Run()
+        public Console(string Identifier) : base(Identifier)
         {
+            this.Identifier = Identifier;
+        }
+
+        public override void Run()
+        {
+            IsRunning = true;
+
             MainWindow = new(new Point(100, 100), new Size(600, 400), "Console");
+            MainWindow.Parent = this;
             Windows.Add(MainWindow);
+        }
+
+        public override void Kill()
+        {
+            IsRunning = false;
         }
     }
 }

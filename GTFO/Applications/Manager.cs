@@ -1,4 +1,4 @@
-﻿using System;
+﻿using GTFO.Graphics.UI;
 using System.Collections.Generic;
 
 namespace GTFO.Applications
@@ -21,18 +21,20 @@ namespace GTFO.Applications
 
         public static void InitializeSystemApplications()
         {
-            Applications.Add(new App("console", System.Console.Run));
+            Applications.Add(new System.Console("console"));
         }
 
-        public class App
+        public abstract class App
         {
             public string Identifier;
-            public Action Run;
+            public bool IsRunning = false;
 
-            public App(string Identifier, Action Run)
+            public abstract void Run();
+            public abstract void Kill();
+
+            public App(string Identifier)
             {
                 this.Identifier = Identifier;
-                this.Run = Run;
             }
         }
     }

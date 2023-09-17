@@ -15,6 +15,12 @@ namespace GTFO.Graphics.UI
 
         public static void Update(Canvas Canvas)
         {
+            //Debug
+            int R = 0;
+            foreach (Applications.Manager.App A in Applications.Manager.Applications) if (A.IsRunning) R++;
+            Kernel.Canvas.DrawString(100, 0, "[W: " + Windows.Count.ToString() + "] [A: " + Applications.Manager.Applications.Count.ToString() + ", R: " + R.ToString() + "]", default, Settings.SystemColors.ToolbarForeground);
+
+
             if (!MouseEx.IsClickPressed()) Mouse.Cursor = 0;
 
             foreach (Window W in Windows)
@@ -89,6 +95,7 @@ namespace GTFO.Graphics.UI
             public Size MaxSize = new Size(int.MaxValue, int.MaxValue);
             public Size MinSize = new Size(100, 20);
             public Action OnClose;
+            public Applications.Manager.App Parent;
 
             internal bool IsMoving;
             internal bool IsResizing;
@@ -188,6 +195,10 @@ namespace GTFO.Graphics.UI
 
             public void Close()
             {
+                int Kill = 0;
+                foreach (Window W in Windows) if (W.Parent == Parent) Kill++;
+                if (Kill < 2) Parent.Kill();
+
                 Windows.Remove(this);
             }
         }
