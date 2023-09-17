@@ -53,75 +53,58 @@ namespace GTFO.Graphics.UI.Controls
                 Status = CursorStatus.Idle;
             }
 
-            if (Gradient || Gradient3D)
+            void DrawGradientBackground(PrismAPI.Graphics.Color background, PrismAPI.Graphics.Color gradientColor)
             {
-                switch (Status)
+                for (int I = 0; I < Size.Height; I++)
                 {
-                    default:
-                        for (int I = 0; I < Size.Height; I++)
-                        {
-                            Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y + I, (ushort)Size.Width, 1, 0, PrismAPI.Graphics.Color.Lerp(Background, GradientColor, 1.0f / Size.Height * I));
-                        }
+                    Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y + I, (ushort)Size.Width, 1, 0, PrismAPI.Graphics.Color.Lerp(background, gradientColor, 1.0f / Size.Height * I));
+                }
 
-                        if (Gradient3D)
-                        {
-                            Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, new(Math.Max(Background.R - 40, 0), Math.Max(Background.G - 40, 0), Math.Max(Background.B - 40, 0)));
-                            Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, new(Math.Max(Background.R - 40, 0), Math.Max(Background.G - 40, 0), Math.Max(Background.B - 40, 0)));
-                            Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, new(Math.Max(Background.R - 40, 0), Math.Max(Background.G - 40, 0), Math.Max(Background.B - 40, 0)));
-                        }
+                if (Gradient3D)
+                {
+                    PrismAPI.Graphics.Color gradient3DColor = new(Math.Max(background.R - 40, 0), Math.Max(background.G - 40, 0), Math.Max(background.B - 40, 0));
 
-                        Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
-                        break;
-                    case CursorStatus.Hovering:
-                        for (int I = 0; I < Size.Height; I++)
-                        {
-                            Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y + I, (ushort)Size.Width, 1, 0, PrismAPI.Graphics.Color.Lerp(BackgroundHover, GradientHover, 1.0f / Size.Height * I));
-                        }
-
-                        if (Gradient3D)
-                        {
-                            Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, new(Math.Max(BackgroundHover.R - 40, 0), Math.Max(BackgroundHover.G - 40, 0), Math.Max(BackgroundHover.B - 40, 0)));
-                            Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, new(Math.Max(BackgroundHover.R - 40, 0), Math.Max(BackgroundHover.G - 40, 0), Math.Max(BackgroundHover.B - 40, 0)));
-                            Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, new(Math.Max(BackgroundHover.R - 40, 0), Math.Max(BackgroundHover.G - 40, 0), Math.Max(BackgroundHover.B - 40, 0)));
-                        }
-
-                        Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
-                        break;
-                    case CursorStatus.Clicked:
-                        for (int I = 0; I < Size.Height; I++)
-                        {
-                            Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y + I, (ushort)Size.Width, 1, 0, PrismAPI.Graphics.Color.Lerp(BackgroundClick, GradientClick, 1.0f / Size.Height * I));
-                        }
-
-                        if (Gradient3D)
-                        {
-                            Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, new(Math.Max(BackgroundClick.R - 40, 0), Math.Max(BackgroundClick.G - 40, 0), Math.Max(BackgroundClick.B - 40, 0)));
-                            Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, new(Math.Max(BackgroundClick.R - 40, 0), Math.Max(BackgroundClick.G - 40, 0), Math.Max(BackgroundClick.B - 40, 0)));
-                            Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, new(Math.Max(BackgroundClick.R - 40, 0), Math.Max(BackgroundClick.G - 40, 0), Math.Max(BackgroundClick.B - 40, 0)));
-                        }
-
-                        Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
-                        break;
+                    Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, gradient3DColor);
+                    Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, gradient3DColor);
+                    Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, gradient3DColor);
                 }
             }
-            else
+
+            switch (Status)
             {
-                switch (Status)
-                {
-                    default:
-                        Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y, (ushort)Size.Width, (ushort)Size.Height, Radius, Background);
-                        Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
-                        break;
-                    case CursorStatus.Hovering:
+                case CursorStatus.Hovering:
+                    if (Gradient || Gradient3D)
+                    {
+                        DrawGradientBackground(BackgroundHover, GradientHover);
+                    }
+                    else
+                    {
                         Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y, (ushort)Size.Width, (ushort)Size.Height, Radius, BackgroundHover);
-                        Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
-                        break;
-                    case CursorStatus.Clicked:
+                    }
+                    break;
+                case CursorStatus.Clicked:
+                    if (Gradient || Gradient3D)
+                    {
+                        DrawGradientBackground(BackgroundClick, GradientClick);
+                    }
+                    else
+                    {
                         Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y, (ushort)Size.Width, (ushort)Size.Height, Radius, BackgroundClick);
-                        Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
-                        break;
-                }
+                    }
+                    break;
+                default:
+                    if (Gradient || Gradient3D)
+                    {
+                        DrawGradientBackground(Background, GradientColor);
+                    }
+                    else
+                    {
+                        Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y, (ushort)Size.Width, (ushort)Size.Height, Radius, Background);
+                    }
+                    break;
             }
+
+            Kernel.Canvas.DrawString(Center ? Location.X + 1 + (Size.Width / 2) : Location.X + 1, Center ? Location.Y + (Size.Height / 2) - 10 : Location.Y, Text, default, Foreground, Center);
         }
     }
 }
