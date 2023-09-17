@@ -53,20 +53,20 @@ namespace GTFO.Graphics.UI.Controls
                 Status = CursorStatus.Idle;
             }
 
-            void DrawGradientBackground(PrismAPI.Graphics.Color background, PrismAPI.Graphics.Color gradientColor)
+            void DrawGradientBackground(PrismAPI.Graphics.Color Background, PrismAPI.Graphics.Color GradientColor)
             {
                 for (int I = 0; I < Size.Height; I++)
                 {
-                    Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y + I, (ushort)Size.Width, 1, 0, PrismAPI.Graphics.Color.Lerp(background, gradientColor, 1.0f / Size.Height * I));
+                    Kernel.Canvas.DrawFilledRectangle(Location.X, Location.Y + I, (ushort)Size.Width, 1, 0, PrismAPI.Graphics.Color.Lerp(Background, GradientColor, 1.0f / Size.Height * I));
                 }
 
                 if (Gradient3D)
                 {
-                    PrismAPI.Graphics.Color gradient3DColor = new(Math.Max(background.R - 40, 0), Math.Max(background.G - 40, 0), Math.Max(background.B - 40, 0));
+                    PrismAPI.Graphics.Color Gradient3DColor = new(Math.Max(Background.R - 40, 0), Math.Max(Background.G - 40, 0), Math.Max(Background.B - 40, 0));
 
-                    Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, gradient3DColor);
-                    Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, gradient3DColor);
-                    Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, gradient3DColor);
+                    Kernel.Canvas.DrawLine(Location.X, Location.Y, Location.X, Location.Y + Size.Height, Gradient3DColor);
+                    Kernel.Canvas.DrawLine(Location.X, Location.Y + Size.Height, Location.X + Size.Width, Location.Y + Size.Height, Gradient3DColor);
+                    Kernel.Canvas.DrawLine(Location.X + Size.Width, Location.Y, Location.X + Size.Width, Location.Y + Size.Height, Gradient3DColor);
                 }
             }
 
